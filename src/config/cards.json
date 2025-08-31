@@ -1,0 +1,122 @@
+{
+  "level1": {
+    "name": "Level 1 - Variablen",
+    "description": "Einfache Variablenzuweisungen und Berechnungen",
+    "rules": [
+      "Erlaubte Befehle: Variablenzuweisung (x = 5), Berechnungen (score = x + 3), Print-Anweisungen",
+      "Ziel: score möglichst nahe an den Zielwert bringen",
+      "Uninitialisierte Variablen führen zu Fehlern"
+    ],
+    "cards": [
+      { "id": "n1", "type": "number", "value": "1", "color": "green", "count": 2 },
+      { "id": "n2", "type": "number", "value": "2", "color": "green", "count": 2 },
+      { "id": "n3", "type": "number", "value": "3", "color": "green", "count": 2 },
+      { "id": "n4", "type": "number", "value": "4", "color": "green", "count": 2 },
+      { "id": "n5", "type": "number", "value": "5", "color": "green", "count": 2 },
+      { "id": "n6", "type": "number", "value": "6", "color": "green", "count": 2 },
+      { "id": "n7", "type": "number", "value": "7", "color": "green", "count": 2 },
+      { "id": "n8", "type": "number", "value": "8", "color": "green", "count": 2 },
+      { "id": "n9", "type": "number", "value": "9", "color": "green", "count": 2 },
+      { "id": "n10", "type": "number", "value":"0", "color": "green", "count": 2 },
+      { "id": "op_add", "type": "operator", "value": "+", "color": "blue", "count": 3 },
+      { "id": "op_sub", "type": "operator", "value": "-", "color": "blue", "count": 3 },
+      { "id": "op_mul", "type": "operator", "value": "*", "color": "blue", "count": 2 },
+      { "id": "op_div", "type": "operator", "value": "/", "color": "blue", "count": 2 },
+      { "id": "assign_x", "type": "assign", "value": "x =", "color": "red", "count": 2 },
+      { "id": "assign_y", "type": "assign", "value": "y =", "color": "red", "count": 2 },
+      { "id": "assign_score", "type": "assign", "value": "score =", "color": "red", "count": 2 },
+      { "id": "assign_global1", "type": "assign", "value": "global_1 =", "color": "red", "count": 1 },
+      { "id": "var_x", "type": "varref", "value": "x", "color": "red", "count": 2 },
+      { "id": "var_y", "type": "varref", "value": "y", "color": "red", "count": 2 },
+      { "id": "var_score", "type": "varref", "value": "score", "color": "red", "count": 2 },
+      { "id": "var_global1", "type": "varref", "value": "global_1", "color": "red", "count": 1 },
+      { "id": "print", "type": "print", "value": "print(score)", "color": "yellow", "count": 2 }
+    ]
+  },
+  "level2": {
+    "name": "Level 2 - Einfache Verzweigungen",
+    "description": "If-Then-Else Strukturen",
+    "rules": [
+      "Neue Strukturen: if-then-else Verzweigungen",
+      "Vergleichsoperatoren: ==, <, >",
+      "Komplette if-then(-else) Struktur muss vor Ausführung stehen"
+    ],
+    "cards": [
+      { "id": "if", "type": "conditional", "value": "if", "color": "red", "count": 5 },
+      { "id": "then", "type": "conditional", "value": "then", "color": "red", "count": 5 },
+      { "id": "else", "type": "conditional", "value": "else", "color": "red", "count": 2 },
+      { "id": "cmp_eq", "type": "compare", "value": "==", "color": "blue", "count": 2 },
+      { "id": "cmp_lt", "type": "compare", "value": "<", "color": "blue", "count": 2 },
+      { "id": "cmp_gt", "type": "compare", "value": ">", "color": "blue", "count": 2 }
+    ]
+  },
+  "level3": {
+    "name": "Level 3 - Verknüpfte Verzweigungen & while",
+    "description": "While-Schleifen und logische Verknüpfungen",
+    "rules": [
+      "Neue Strukturen: while-do-end Schleifen",
+      "Logische Operatoren: and, or",
+      "Maximale Iterationen: 50 (Schutz vor Endlosschleifen)"
+    ],
+    "cards": [
+      { "id": "while", "type": "loop", "value": "while", "color": "red", "count": 6 },
+      { "id": "do", "type": "loop", "value": "do", "color": "red", "count": 6 },
+      { "id": "end", "type": "loop", "value": "end", "color": "red", "count": 4 },
+      { "id": "and", "type": "logical", "value": "and", "color": "blue", "count": 2 },
+      { "id": "or", "type": "logical", "value": "or", "color": "blue", "count": 2 }
+    ]
+  },
+  "level4": {
+    "name": "Level 4 - For-Schleifen",
+    "description": "For-Schleifen mit Zählvariablen",
+    "rules": [
+      "Neue Strukturen: for i=1 to N do-end",
+      "Zählvariable i kann in Befehlen verwendet werden",
+      "Exakte N Iterationen pro Schleife"
+    ],
+    "cards": [
+      { "id": "for", "type": "for", "value": "for i = 1 to", "color": "red", "count": 6 },
+      { "id": "for_do", "type": "for", "value": "do", "color": "red", "count": 6 },
+      { "id": "for_end", "type": "for", "value": "end", "color": "red", "count": 4 },
+      { "id": "var_i", "type": "varref", "value": "i", "color": "red", "count": 2 }
+    ]
+  },
+  "gameConfig": {
+    "defaultTimerSeconds": 30,
+    "defaultRounds": 10,
+    "maxIterations": 50,
+    "defaultTargetScore": 100,
+    "wheelColors": ["green", "red", "blue", "yellow"],
+    "wheelProbabilities": {
+      "level1": {
+        "green": 0.40,
+        "red": 0.30,
+        "blue": 0.20,
+        "yellow": 0.10
+      },
+      "level2": {
+        "green": 0.30,
+        "red": 0.40,
+        "blue": 0.25,
+        "yellow": 0.05
+      },
+      "level3": {
+        "green": 0.25,
+        "red": 0.35,
+        "blue": 0.30,
+        "yellow": 0.10
+      },
+      "level4": {
+        "green": 0.20,
+        "red": 0.40,
+        "blue": 0.25,
+        "yellow": 0.15
+      }
+    },
+    "sounds": {
+      "timerEnd": true,
+      "wheelSpin": true,
+      "cardPlay": true
+    }
+  }
+}
