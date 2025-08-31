@@ -28,10 +28,9 @@ const RulesWizard = ({ gameConfig, onComplete, onSkip }) => {
     {
       id: 'yellow',
       title: '🟡 Gelbe Karten - Print-Funktion',
-      icon: '�️'
+      icon: '🖨️'
     }
   ];
-
   const selectedLevelData = cardsConfig[`level${gameConfig.level}`];
 
   const goToPage = (pageIndex) => {
@@ -71,7 +70,7 @@ const RulesWizard = ({ gameConfig, onComplete, onSkip }) => {
             🎯 Spielziel
           </h3>
           <p className="text-blue-700">
-            Bringt die Variable "score" möglichst nahe an den <strong>Zielwert {gameConfig.targetScore}</strong> heran. 
+            Bringt den angezeigten Wert auf eurem Bildschirm möglichst nahe an den <strong>Zielwert {gameConfig.targetScore}</strong> heran. 
             Das Team, das am Ende dem Zielwert am nächsten kommt, gewinnt!
           </p>
         </div>
@@ -96,12 +95,12 @@ const RulesWizard = ({ gameConfig, onComplete, onSkip }) => {
           <div className="text-center">
             <div className="text-3xl mb-2">🎲</div>
             <div className="font-bold text-yellow-700">1. Rad drehen</div>
-            <div className="text-sm text-yellow-600">Lehrkraft dreht das Glücksrad</div>
+            <div className="text-sm text-yellow-600">Zufallsfarbe</div>
           </div>
           <div className="text-center">
             <div className="text-3xl mb-2">👁️</div>
             <div className="font-bold text-yellow-700">2. Farbe sehen</div>
-            <div className="text-sm text-yellow-600">Schüler sehen aktive Kartenfarbe</div>
+            <div className="text-sm text-yellow-600">Schüler*innen wählen Kartenfarbe</div>
           </div>
           <div className="text-center">
             <div className="text-3xl mb-2">⏰</div>
@@ -134,10 +133,9 @@ const RulesWizard = ({ gameConfig, onComplete, onSkip }) => {
       <div className="bg-red-50 p-6 rounded-lg">
         <h3 className="text-xl font-bold text-red-800 mb-4">⚠️ Wichtige Hinweise</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-red-700">
-          <div>• Uninitialisierte Variablen führen zu Fehlern</div>
+          <div>• Fehlerhafter Code: zufällige Strafkarte</div>
           <div>• Division durch Null ist nicht erlaubt</div>
-          <div>• Karten bleiben im Pool (werden nicht verbraucht)</div>
-          <div>• Befehle müssen vollständig und syntaktisch korrekt sein</div>
+          <div>• Karten werden offen in den Pool zurückgelegt</div>
         </div>
       </div>
     </div>
@@ -218,12 +216,10 @@ const RulesWizard = ({ gameConfig, onComplete, onSkip }) => {
             color="green"
             colorName="Grüne"
             description="Zahlen von 1 bis 10 für Berechnungen und Zuweisungen"
-            examples={['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']}
+            examples={['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']}
             tips={[
-              'Werden für einfache Zuweisungen verwendet: x = 5',
+              'Können für einfache Zuweisungen verwendet werden: x = 5 oder score = 8',
               'Können in Berechnungen eingesetzt werden: score = x + 3',
-              'Sind in allen Levels gleich verfügbar',
-              'Bilden die Grundlage für alle mathematischen Operationen'
             ]}
           />
         );
@@ -233,15 +229,16 @@ const RulesWizard = ({ gameConfig, onComplete, onSkip }) => {
           <ColorCardPage
             color="red"
             colorName="Rote"
-            description="Zuweisungen, Variablenreferenzen und Kontrollstrukturen"
-            examples={gameConfig.level === 1 ? ['x =', 'y =', 'score =', 'global_1 =', 'x', 'y', 'score', 'global_1'] :
+            description="Zuweisungen, Variablenreferenzen"
+            examples={gameConfig.level === 1 ? ['x =', 'global_1 =', 'x', 'score', 'global_1'] :
                      gameConfig.level === 2 ? ['x =', 'y =', 'score =', 'global_1 =', 'x', 'y', 'score', 'global_1', 'if', 'then', 'else'] :
                      gameConfig.level === 3 ? ['x =', 'y =', 'score =', 'global_1 =', 'x', 'y', 'score', 'global_1', 'if', 'then', 'else', 'while', 'do', 'end'] :
                      ['x =', 'y =', 'score =', 'global_1 =', 'x', 'y', 'score', 'global_1', 'if', 'then', 'for i = 1 to', 'do', 'end', 'i']}
             tips={gameConfig.level === 1 ? [
               'Zuweisungen setzen Variablenwerte: x = 5',
-              'Variablen in Berechnungen verwenden: score = x + y',
-              'Globale Variable global_1 für teamübergreifende Kommunikation'
+              'Variablen in Berechnungen verwenden: score = x + 5',
+              'Globale Variable global_1 ist für sämtliche Gruppen die selbe. Sie wird an der Tafel angezeigt und verändert wie andere Variablen auch. Sie wird immer vor den Berechnungen der anderen Gruppen abgearbeitet.',
+              'Zuweisungen müssen immer korrekt Zeile für Zeile abgearbeitet werden können. Dabei ist ein: score = ... oder ein global_1 = ... ungültig. '
             ] : gameConfig.level === 2 ? [
               'If-Then-Else für Verzweigungen: if x < 5 then y = 1 else y = 2',
               'Variablen in Bedingungen: if score > global_1 then',
@@ -270,7 +267,9 @@ const RulesWizard = ({ gameConfig, onComplete, onSkip }) => {
                      ['+', '-', '*', '/', '==', '<', '>', 'and', 'or']}
             tips={gameConfig.level === 1 ? [
               'Mathematische Grundoperationen: +, -, *, /',
-              'Verwendung in Berechnungen: score = x + y * 2',
+              'Ein Operator ersetzt ein beliebiges + oder -.',
+              'Wichtig: wird ein Grundoperator gezogen muss das Programm sofort durchgeführt werden, auch wenn dabei Fehler entstehen.',
+              'Sonderfall: der Zuweisungsoperator = kann zu der Variante +=, -=, *=, /= erweitert werden, z.B. score += 5. In disem Fall löst der Operator nicht sofort das Ausführen aus. Die nächste rote oder grüne Karte muss jedoch sofort in diese Zeile gelgt werden.',
               'Division durch Null führt zu Fehlern'
             ] : gameConfig.level === 2 ? [
               'Vergleichsoperatoren für If-Anweisungen: ==, <, >',
@@ -292,11 +291,7 @@ const RulesWizard = ({ gameConfig, onComplete, onSkip }) => {
             description="Print-Funktion für Ausgabe auf analogen Bildschirm"
             examples={['print(score)']}
             tips={[
-              'Nur eine gelbe Karte: print(score)',
-              'Zeigt den aktuellen Score-Wert auf dem "analogen Bildschirm"',
-              'Wird durch Gelb am Glücksrad aktiviert',
-              'Schüler schreiben den Score-Wert auf ihren Bildschirm-Bereich',
-              'Sehr wichtig für das Verfolgen des Spielfortschritts!'
+              'Schüler*innen schreiben den aktuellen Wert der Variable score auf ihren Bildschirm-Bereich'
             ]}
           />
         );
