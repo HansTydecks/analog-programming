@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import cardsConfig from '../config/cards.json';
 import WheelAlgorithm from '../lib/wheelAlgorithm';
+import StrategicWheelController from '../lib/strategicWheel';
 import GameEvaluator from '../lib/evaluator';
 
 // Components
@@ -13,6 +14,7 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
   // Game State
   const [gameState, setGameState] = useState(null);
   const [wheelAlgorithm] = useState(() => new WheelAlgorithm());
+  const [strategicWheel] = useState(() => new StrategicWheelController());
   const [evaluator] = useState(() => new GameEvaluator());
   
   // UI State
@@ -53,7 +55,11 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
     return Math.max(5, newDuration);
   };
 
+  // Initialize strategic wheel with total rounds
   const initializeGame = () => {
+    const totalRounds = gameConfig.rounds || cardsConfig.gameConfig.defaultRounds;
+    strategicWheel.reset(totalRounds);
+    
     const levelProbabilities = cardsConfig.gameConfig.wheelProbabilities[`level${gameConfig.level}`] || 
                               cardsConfig.gameConfig.wheelProbabilities.level1;
     
@@ -65,7 +71,7 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
       level: gameConfig.level,
       variables: { global_1: null },
       rounds: {
-        total: gameConfig.rounds || cardsConfig.gameConfig.defaultRounds,
+        total: totalRounds,
         current: 1
       },
       state: {
@@ -91,7 +97,7 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
     }, 500); // Small delay to ensure UI is ready
   };
 
-  // Wheel handling
+  // Strategic Wheel handling
   const handleSpin = () => {
     if (isSpinning) return;
     
@@ -102,7 +108,8 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
     playWheelRattleSound();
     
     setTimeout(() => {
-      const result = wheelAlgorithm.spin();
+      // Use strategic wheel algorithm instead of pure random
+      const result = strategicWheel.spinStrategic();
       setLastWheelResult(result);
       setIsSpinning(false);
       
@@ -119,24 +126,20 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
       setTimerKey(prev => prev + 1); // Force timer reset
       setTimerRunning(true);
       
-      // Increment round (only after first spin)
-      let nextRound = currentRound;
-      if (!isFirstSpin) {
-        nextRound = Math.min(currentRound + 1, gameState.rounds.total);
-        setCurrentRound(nextRound);
-        setGameState(prev => ({
-          ...prev,
-          rounds: { ...prev.rounds, current: nextRound }
-        }));
-      } else {
-        setIsFirstSpin(false); // Mark that first spin is done
-      }
+      // Update round counter from strategic wheel
+      setCurrentRound(result.round);
+      setGameState(prev => ({
+        ...prev,
+        rounds: { ...prev.rounds, current: result.round }
+      }));
       
-      // Log the spin
+      // Log the strategic spin with reasoning
       const actionDescription = result.color === 'yellow' ? 
-        `Rad gedreht - Print-Funktion aktiviert - Runde ${nextRound}` :
-        `Rad gedreht - Runde ${nextRound}`;
-      evaluator.logAction('teacher', actionDescription, `Farbe: ${result.color}`);
+        `Strategisches Rad gedreht - Print-Funktion aktiviert - Runde ${result.round}` :
+        `Strategisches Rad gedreht - Runde ${result.round}`;
+      
+      const logDetails = `Farbe: ${result.color} | Grund: ${result.reason}`;
+      evaluator.logAction('teacher', actionDescription, logDetails);
       updateGameLog();
     }, 3000); // 3 second spin animation
   };
@@ -144,28 +147,23 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
   const handleForceColor = (color) => {
     if (isSpinning) return;
     
-    const result = wheelAlgorithm.forceColor(color);
+    // Use strategic wheel for forced colors too
+    const result = strategicWheel.forceColor(color);
     setLastWheelResult(result);
     
     // Reset and start timer
     setTimerKey(prev => prev + 1); // Force timer reset
     setTimerRunning(true);
     
-    // Increment round (only after first spin)
-    let nextRound = currentRound;
-    if (!isFirstSpin) {
-      nextRound = Math.min(currentRound + 1, gameState.rounds.total);
-      setCurrentRound(nextRound);
-      setGameState(prev => ({
-        ...prev,
-        rounds: { ...prev.rounds, current: nextRound }
-      }));
-    } else {
-      setIsFirstSpin(false); // Mark that first spin is done
-    }
+    // Update round counter from strategic wheel
+    setCurrentRound(result.round);
+    setGameState(prev => ({
+      ...prev,
+      rounds: { ...prev.rounds, current: result.round }
+    }));
     
     // Log the forced spin
-    evaluator.logAction('teacher', `Farbe erzwungen - Runde ${nextRound}`, `Farbe: ${color}`);
+    evaluator.logAction('teacher', `Farbe erzwungen - Runde ${result.round}`, `Farbe: ${color}`);
     updateGameLog();
   };
 
@@ -350,11 +348,11 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
   const resetGame = () => {
     evaluator.reset();
     wheelAlgorithm.reset();
+    strategicWheel.reset(gameState.rounds.total); // Reset strategic wheel too
     setLastWheelResult(null);
     setTimerRunning(false);
     setTimerKey(prev => prev + 1); // Reset timer
     setCurrentRound(1);
-    setIsFirstSpin(true); // Reset first spin flag
     setGameState(prev => ({
       ...prev,
       variables: { global_1: null },
@@ -618,6 +616,48 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
             </div>
             <div className="text-sm text-green-600 mt-1">
               🎲 Global 1 kann mit dem Würfel-Button randomisiert werden (5-15)
+            </div>
+          </div>
+        </div>
+
+        {/* Strategic Wheel Statistics */}
+        <div className="card mb-6">
+          <h3 className="text-xl font-bold mb-4 text-center">🎯 Strategische Rad-Statistiken</h3>
+          {(() => {
+            const stats = strategicWheel.getGameStats();
+            return (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                <div className="bg-yellow-50 p-3 rounded">
+                  <div className="text-2xl font-bold text-yellow-600">{stats.printCount}/3</div>
+                  <div className="text-xs text-yellow-700">Print-Ereignisse</div>
+                </div>
+                <div className="bg-green-50 p-3 rounded">
+                  <div className="text-2xl font-bold text-green-600">{stats.colorCounts.green}</div>
+                  <div className="text-xs text-green-700">Grüne Karten</div>
+                </div>
+                <div className="bg-red-50 p-3 rounded">
+                  <div className="text-2xl font-bold text-red-600">{stats.colorCounts.red}</div>
+                  <div className="text-xs text-red-700">Rote Karten</div>
+                </div>
+                <div className="bg-blue-50 p-3 rounded">
+                  <div className="text-2xl font-bold text-blue-600">{stats.colorCounts.blue}</div>
+                  <div className="text-xs text-blue-700">Blaue Karten</div>
+                </div>
+              </div>
+            );
+          })()}
+          
+          {lastWheelResult && lastWheelResult.reason && (
+            <div className="mt-4 p-3 bg-gray-50 rounded text-center">
+              <div className="text-sm text-gray-600">Letzter Spin-Grund:</div>
+              <div className="text-sm font-medium text-gray-800">{lastWheelResult.reason}</div>
+            </div>
+          )}
+          
+          <div className="mt-4 text-center">
+            <div className="text-xs text-gray-500">
+              💡 Das Rad ist strategisch manipuliert für optimales Lernerlebnis:<br/>
+              Mehr Grün (Zahlen), weniger Blau (seltene Karten), garantiertes Print am Ende
             </div>
           </div>
         </div>

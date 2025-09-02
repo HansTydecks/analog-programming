@@ -105,24 +105,14 @@ const RulesWizard = ({ gameConfig, onComplete, onSkip }) => {
                   <span className="text-green-500 mt-1">•</span>
                   <span>Spiele insgesamt {gameConfig.rounds} Runden</span>
                 </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <h3 className="text-xl font-bold text-yellow-800 mb-4">⭐ Besonderheiten in {selectedLevelData.name}</h3>
-            <p className="text-yellow-700">
-              {selectedLevelData.description}
-            </p>
-            <div className="mt-3">
-              <strong className="text-yellow-800">Spezielle Regeln:</strong>
-              <ul className="mt-2 space-y-1">
-                {selectedLevelData.rules.map((rule, index) => (
-                  <li key={index} className="flex items-start space-x-2 text-yellow-700">
-                    <span className="text-yellow-500 mt-1">•</span>
-                    <span>{rule}</span>
-                  </li>
-                ))}
+                <li className="flex items-start space-x-2">
+                  <span className="text-green-500 mt-1">•</span>
+                  <span>Zuweisungen dürfen zu jedem beliebigen Zeitpunkt durchgeführt werden. </span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <span className="text-green-500 mt-1">•</span>
+                  <span>Es werden alle Befehle wie beim Programmieren von oben nach unten durchgeführt. </span>
+                </li>
               </ul>
             </div>
           </div>
@@ -154,7 +144,7 @@ const RulesWizard = ({ gameConfig, onComplete, onSkip }) => {
               </div>
             </div>
             <div>
-              <h3 className="text-xl font-bold text-green-800 mb-4">Tipps</h3>
+              <h3 className="text-xl font-bold text-green-800 mb-4">Regeln</h3>
               <ul className="space-y-2 text-green-700">
                 <li className="flex items-start space-x-2">
                   <span className="text-green-500 mt-1">•</span>
@@ -162,11 +152,7 @@ const RulesWizard = ({ gameConfig, onComplete, onSkip }) => {
                 </li>
                 <li className="flex items-start space-x-2">
                   <span className="text-green-500 mt-1">•</span>
-                  <span>Können direkt in Zuweisungen verwendet werden</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-green-500 mt-1">•</span>
-                  <span>Mehrstellige Zahlen durch Kombination mehrerer Karten</span>
+                  <span>Werden in Zuweisungen verwendet</span>
                 </li>
               </ul>
             </div>
@@ -215,9 +201,10 @@ const RulesWizard = ({ gameConfig, onComplete, onSkip }) => {
                   let tips = [];
                   if (gameConfig.level === 1) {
                     tips = [
-                      'Zuweisungen setzen Variablenwerte: global_1 = 5',
-                      'Variablen in Berechnungen verwenden: global_1 + 3',
-                      'Globale Variable global_1 für teamübergreifende Kommunikation'
+                      'Zuweisungen wie x = oder global_1 = werden als neue Zeile unter score = gelegt und können ausgefüllt werden',
+                      'Beim Ausführen müssen diese Zeilen ebenfalls gefüllt werden, sonst führt der Fehler zu einer zufälligen Strafkarte.',
+                      'Variablen werden wie beim Programmieren behandelt.'
+
                     ];
                   } else if (gameConfig.level === 2) {
                     tips = [
@@ -291,8 +278,9 @@ const RulesWizard = ({ gameConfig, onComplete, onSkip }) => {
                   if (gameConfig.level === 1) {
                     tips = [
                       'Mathematische Grundoperationen: +, -, *, /',
-                      'Verwendung in Berechnungen: global_1 + 2',
-                      'Division durch Null führt zu Fehlern'
+                      'Operatoren ersetzen ein beliebiges + oder -',
+                      'Sonderregel: Operatoren müssen an den Zuweisungsoperator = angefügt werden wenn man kein + oder - ersetzen kann.',
+                      'Nach der blauen Karte muss das Programm sofort von oben nach unten ausgeführt werden AUßER der Operator wurde soeben an ein = angefügt.'
                     ];
                   } else if (gameConfig.level === 2) {
                     tips = [
@@ -345,23 +333,7 @@ const RulesWizard = ({ gameConfig, onComplete, onSkip }) => {
               <ul className="space-y-2 text-yellow-700">
                 <li className="flex items-start space-x-2">
                   <span className="text-yellow-500 mt-1">•</span>
-                  <span>Nur eine gelbe Karte: print(score)</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-yellow-500 mt-1">•</span>
-                  <span>Zeigt den aktuellen Score-Wert auf dem "analogen Bildschirm"</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-yellow-500 mt-1">•</span>
-                  <span>Wird durch Gelb am Glücksrad aktiviert</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-yellow-500 mt-1">•</span>
-                  <span>Schüler schreiben den Score-Wert auf ihren Bildschirm-Bereich</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-yellow-500 mt-1">•</span>
-                  <span>Sehr wichtig für das Verfolgen des Spielfortschritts!</span>
+                  <span>Wird Gelb ausgewählt so wird der aktuelle Wert von score auf den Bildschirm übertragen.</span>
                 </li>
               </ul>
             </div>
