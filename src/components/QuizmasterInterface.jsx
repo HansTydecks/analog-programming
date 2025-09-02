@@ -26,6 +26,7 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
   const [currentRound, setCurrentRound] = useState(1); // Track current round
   const [isRandomizingGlobal, setIsRandomizingGlobal] = useState(false); // Animation state for global_1 randomization
   const [showPrintDisplay, setShowPrintDisplay] = useState(false); // Show print display when yellow is spun
+  const [showGlobalDisplay, setShowGlobalDisplay] = useState(false); // Show global variable display when randomized
   const [isFirstSpin, setIsFirstSpin] = useState(true); // Track if this is the first spin
 
   // Initialize game state
@@ -83,6 +84,11 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
     setGameState(newGameState);
     setCurrentRound(1);
     evaluator.reset();
+    
+    // Automatically randomize global_1 at game start with full-screen animation
+    setTimeout(() => {
+      autoRandomizeGlobal1();
+    }, 500); // Small delay to ensure UI is ready
   };
 
   // Wheel handling
@@ -91,6 +97,9 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
     
     setIsSpinning(true);
     setTimerRunning(false);
+    
+    // Play wheel rattle sound during spin
+    playWheelRattleSound();
     
     setTimeout(() => {
       const result = wheelAlgorithm.spin();
@@ -177,6 +186,49 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
     }));
   };
 
+  // Sound functions
+  const playWheelRattleSound = () => {
+    if (!soundEnabled) return;
+    
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const duration = 3; // 3 seconds like the spin animation
+      const intervalTime = 0.05; // Rattle every 50ms
+      
+      let currentTime = 0;
+      const playRattleInterval = setInterval(() => {
+        if (currentTime >= duration) {
+          clearInterval(playRattleInterval);
+          return;
+        }
+        
+        // Create short click/rattle sound
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Random frequency for realistic rattle effect
+        const frequency = 200 + Math.random() * 300; // 200-500 Hz
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        oscillator.type = 'square'; // More rattly sound
+        
+        // Short sharp sound
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.02);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.02);
+        
+        currentTime += intervalTime;
+      }, intervalTime * 1000);
+      
+    } catch (error) {
+      console.log('Audio not supported');
+    }
+  };
+
   // Teacher controls
   const handleVariableChange = (varName, value) => {
     evaluator.setVariables({ [varName]: value });
@@ -191,7 +243,50 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
     updateGameLog();
   };
 
-  // Randomize global_1 with animation
+  // Auto-randomize global_1 at game start with full-screen display
+  const autoRandomizeGlobal1 = () => {
+    if (isRandomizingGlobal) return; // Prevent multiple simultaneous animations
+    
+    // Show the display immediately
+    setShowGlobalDisplay(true);
+    setIsRandomizingGlobal(true);
+    
+    let counter = 0;
+    const maxSteps = 15; // Number of animation steps
+    
+    const animationInterval = setInterval(() => {
+      // Generate random number during animation
+      const tempValue = Math.floor(Math.random() * 11) + 5; // 5-15
+      
+      setGameState(prev => ({
+        ...prev,
+        variables: { ...prev.variables, global_1: tempValue }
+      }));
+      
+      counter++;
+      
+      if (counter >= maxSteps) {
+        clearInterval(animationInterval);
+        
+        // Set final random value
+        const finalValue = Math.floor(Math.random() * 11) + 5; // 5-15
+        evaluator.setVariables({ global_1: finalValue });
+        const newVariables = evaluator.getVariables();
+        
+        setGameState(prev => ({
+          ...prev,
+          variables: newVariables
+        }));
+        
+        evaluator.logAction('teacher', 'Global Variable automatisch randomisiert', `global_1 = ${finalValue} (Spielstart-Würfelung 5-15)`);
+        updateGameLog();
+        setIsRandomizingGlobal(false);
+        
+        // Display stays visible until user closes it
+      }
+    }, 100); // Animation speed: 100ms per step
+  };
+
   const randomizeGlobal1 = () => {
     if (isRandomizingGlobal) return; // Prevent multiple simultaneous animations
     
@@ -226,6 +321,9 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
         evaluator.logAction('teacher', 'Global Variable randomisiert', `global_1 = ${finalValue} (Zufallswert 5-15)`);
         updateGameLog();
         setIsRandomizingGlobal(false);
+        
+        // Show the global variable display (like yellow field)
+        setShowGlobalDisplay(true);
       }
     }, 100); // Animation speed: 100ms per step
   };
@@ -334,6 +432,31 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
               className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-bold text-lg"
             >
               ✅ Verstanden
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Global Variable Display */}
+      {showGlobalDisplay && (
+        <div className="fixed inset-0 bg-blue-900 bg-opacity-80 flex items-center justify-center z-50">
+          <div className="bg-blue-100 border-4 border-blue-500 rounded-xl p-12 text-center shadow-2xl max-w-2xl">
+            <div className="text-8xl mb-6 animate-pulse">🎲</div>
+            <div className="text-3xl font-bold text-blue-800 mb-4">
+              GLOBALE VARIABLE WURDE AUSGEWÜRFELT!
+            </div>
+            <div className="text-6xl font-mono text-blue-900 mb-6 bg-blue-200 p-4 rounded-lg border-2 border-blue-600">
+              global_1 = {gameState.variables?.global_1 || 0}
+            </div>
+            <div className="text-xl text-blue-700 mb-4">
+              🎯 Alle Teams können nun mit diesem Startwert arbeiten!<br/>
+              📝 Der Wert ist für alle Teams sichtbar und verwendbar.
+            </div>
+            <button
+              onClick={() => setShowGlobalDisplay(false)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold text-lg"
+            >
+              ✅ Verstanden - Spiel kann beginnen!
             </button>
           </div>
         </div>

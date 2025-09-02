@@ -35,6 +35,11 @@ const Timer = ({
             return 0;
           }
           
+          // Play warning sound in last 5 seconds
+          if (newTime <= 5 && newTime > 0 && soundEnabled) {
+            playWarningSound();
+          }
+          
           return newTime;
         });
       }, 1000);
@@ -70,6 +75,30 @@ const Timer = ({
       
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 1);
+    } catch (error) {
+      console.log('Audio not supported');
+    }
+  };
+
+  const playWarningSound = () => {
+    // Create a shorter, higher-pitched warning beep for last 5 seconds
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Higher pitch and shorter duration for warning
+      oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.2); // Much shorter beep
     } catch (error) {
       console.log('Audio not supported');
     }
