@@ -5,37 +5,25 @@ class StrategicWheelController {
     this.totalRounds = totalRounds;
     this.currentRound = 0;
     this.printCount = 0;
-    this.targetPrintCount = 3; // ~3 Print-Ereignisse bei 15 Runden
+    this.targetPrintCount = Math.min(3, Math.max(2, Math.floor(totalRounds / 6))); // 2-3 Print events based on round count
     this.spinsHistory = [];
     
     // Basis-Wahrscheinlichkeiten für pädagogische Optimierung
     this.strategicProbabilities = {
-      green: 0.45,  // Höchste: Viele Zahlen für Punktesammlung
-      red: 0.30,    // Mittlere: Operatoren für Rechnung
-      blue: 0.15,   // Niedrigste: Seltene blaue Karten
-      yellow: 0.10  // Print-Funktion (wird strategisch gesetzt)
+      green: 0.40,  // Equal with red: Zahlen für Punktesammlung
+      red: 0.40,    // Equal with green: Operatoren für Rechnung
+      blue: 0.15,   // Less often: Seltene blaue Karten
+      yellow: 0.05  // 2-3 times total: Print-Funktion
     };
     
     // Mindest- und Maximalwahrscheinlichkeiten
     this.minProb = 0.05;
-    this.maxProb = 0.60;
+    this.maxProb = 0.65;
   }
 
   // Hauptfunktion: Strategisches Rad-Drehen
   spinStrategic() {
     this.currentRound++;
-    
-    // Letzte Runde: IMMER Print (100% Wahrscheinlichkeit)
-    if (this.currentRound === this.totalRounds) {
-      this.printCount++;
-      this.spinsHistory.push('yellow');
-      return {
-        color: 'yellow',
-        reason: 'Garantiertes Print in letzter Runde',
-        round: this.currentRound,
-        probabilities: { yellow: 1.0, green: 0, red: 0, blue: 0 }
-      };
-    }
     
     // Berechne angepasste Wahrscheinlichkeiten
     const probabilities = this.calculateStrategicProbabilities();
@@ -60,54 +48,72 @@ class StrategicWheelController {
   // Berechne strategische Wahrscheinlichkeiten basierend auf aktuellem Spielstand
   calculateStrategicProbabilities() {
     const remainingRounds = this.totalRounds - this.currentRound;
-    const needMorePrint = this.printCount < 2; // Brauchen wir noch Print-Ereignisse?
+    const lastColor = this.spinsHistory[this.spinsHistory.length - 1];
     
     let probabilities = { ...this.strategicProbabilities };
     
-    // Print-Strategie: Sorge für ~3 Print-Ereignisse
-    if (needMorePrint && remainingRounds > 1) {
-      // Erhöhe Print-Wahrscheinlichkeit, wenn zu wenig Print-Ereignisse
-      const printDeficit = 2 - this.printCount;
-      const printBoost = printDeficit * 0.15; // Boost pro fehlendes Print
-      probabilities.yellow = Math.min(0.40, probabilities.yellow + printBoost);
-    } else if (this.printCount >= 2 && remainingRounds > 1) {
-      // Reduziere Print-Wahrscheinlichkeit, wenn genug Print-Ereignisse
-      probabilities.yellow = Math.max(0.02, probabilities.yellow * 0.3);
+    // REGEL 1: Yellow sollte nur 2-3 mal insgesamt erscheinen
+    if (this.printCount >= this.targetPrintCount && remainingRounds > 1) {
+      // Bereits genug Yellow-Ereignisse - drastisch reduzieren
+      probabilities.yellow = 0.02;
+    } else if (remainingRounds <= 2 && this.printCount < 2) {
+      // Letzte Chancen für Yellow - erhöhen
+      probabilities.yellow = Math.min(0.35, probabilities.yellow * 3);
     }
     
-    // Anti-Wiederholungs-Mechanismus: Reduziere Wahrscheinlichkeit der letzten Farbe
-    const lastColor = this.spinsHistory[this.spinsHistory.length - 1];
-    if (lastColor && probabilities[lastColor] > 0.15) {
-      const reduction = probabilities[lastColor] * 0.3;
-      probabilities[lastColor] -= reduction;
+    // REGEL 2: Yellow niemals zweimal hintereinander
+    if (lastColor === 'yellow') {
+      probabilities.yellow = 0; // Komplett ausschließen
+    }
+    
+    // REGEL 3: Blue niemals zweimal hintereinander
+    if (lastColor === 'blue') {
+      probabilities.blue = 0; // Komplett ausschließen
+    }
+    
+    // REGEL 4: Green und Red etwa gleich häufig
+    const recentSpins = this.spinsHistory.slice(-6); // Letzte 6 Spins betrachten
+    const greenCount = recentSpins.filter(c => c === 'green').length;
+    const redCount = recentSpins.filter(c => c === 'red').length;
+    
+    if (greenCount > redCount + 2) {
+      // Zu viel Grün - Red fördern
+      probabilities.red = Math.min(0.65, probabilities.red * 1.4);
+      probabilities.green = Math.max(0.15, probabilities.green * 0.7);
+    } else if (redCount > greenCount + 2) {
+      // Zu viel Rot - Green fördern
+      probabilities.green = Math.min(0.65, probabilities.green * 1.4);
+      probabilities.red = Math.max(0.15, probabilities.red * 0.7);
+    }
+    
+    // REGEL 5: Vermeide zu viele Wiederholungen der letzten Farbe
+    if (lastColor && lastColor !== 'yellow' && lastColor !== 'blue') {
+      probabilities[lastColor] = Math.max(0.15, probabilities[lastColor] * 0.6);
       
-      // Verteile die Reduktion auf andere Farben (außer Yellow)
-      const otherColors = Object.keys(probabilities).filter(c => c !== lastColor && c !== 'yellow');
-      const boost = reduction / otherColors.length;
+      // Verteile die Reduktion auf andere verfügbare Farben
+      const otherColors = Object.keys(probabilities).filter(c => 
+        c !== lastColor && probabilities[c] > 0
+      );
+      const boost = (probabilities[lastColor] * 0.4) / otherColors.length;
       otherColors.forEach(color => {
         probabilities[color] += boost;
       });
     }
     
-    // Adaptive Grün-Förderung für bessere Punktesammlung
-    const recentGreens = this.spinsHistory.slice(-5).filter(c => c === 'green').length;
-    if (recentGreens < 2) { // Zu wenig grüne Karten in letzten 5 Runden
-      probabilities.green = Math.min(0.60, probabilities.green * 1.3);
-      probabilities.blue = Math.max(0.05, probabilities.blue * 0.7);
-    }
-    
     // Normalisierung: Stelle sicher, dass alle Wahrscheinlichkeiten zusammen 1 ergeben
     const total = Object.values(probabilities).reduce((sum, p) => sum + p, 0);
-    Object.keys(probabilities).forEach(color => {
-      probabilities[color] = Math.max(this.minProb, 
-                                    Math.min(this.maxProb, probabilities[color] / total));
-    });
-    
-    // Erneute Normalisierung nach Min/Max-Anwendung
-    const adjustedTotal = Object.values(probabilities).reduce((sum, p) => sum + p, 0);
-    Object.keys(probabilities).forEach(color => {
-      probabilities[color] = probabilities[color] / adjustedTotal;
-    });
+    if (total > 0) {
+      Object.keys(probabilities).forEach(color => {
+        probabilities[color] = Math.max(this.minProb, 
+                                      Math.min(this.maxProb, probabilities[color] / total));
+      });
+      
+      // Erneute Normalisierung nach Min/Max-Anwendung
+      const adjustedTotal = Object.values(probabilities).reduce((sum, p) => sum + p, 0);
+      Object.keys(probabilities).forEach(color => {
+        probabilities[color] = probabilities[color] / adjustedTotal;
+      });
+    }
     
     return probabilities;
   }
@@ -133,24 +139,26 @@ class StrategicWheelController {
 
   // Erkläre warum diese Farbe gewählt wurde
   getSpinReason(color, probability) {
+    const lastColor = this.spinsHistory[this.spinsHistory.length - 1];
+    
     if (color === 'yellow') {
-      if (this.printCount < 2) {
-        return `Print gefördert (${this.printCount}/3 Print-Ereignisse)`;
+      if (this.printCount <= this.targetPrintCount) {
+        return `Print-Ereignis (${this.printCount}/${this.targetPrintCount} erreicht)`;
       } else {
-        return `Zufälliges Print`;
+        return `Seltenes Print-Ereignis`;
       }
     }
     
-    if (color === 'green' && probability > 0.50) {
-      return `Grün gefördert für bessere Punktesammlung`;
+    if (lastColor === color && color !== 'yellow' && color !== 'blue') {
+      return `Wiederholung trotz Reduktion (${Math.round(probability * 100)}%)`;
     }
     
-    if (color === 'red' && probability > 0.35) {
-      return `Rot gefördert für mehr Rechenoperationen`;
+    if ((color === 'green' || color === 'red') && probability > 0.50) {
+      return `${color === 'green' ? 'Grün' : 'Rot'} gefördert für Balance`;
     }
     
     if (color === 'blue') {
-      return `Seltene blaue Karte`;
+      return `Seltene blaue Karte (${Math.round(probability * 100)}%)`;
     }
     
     return `Normale Wahrscheinlichkeit (${Math.round(probability * 100)}%)`;
@@ -191,7 +199,7 @@ class StrategicWheelController {
       spinsHistory: [...this.spinsHistory],
       colorCounts: colorCounts,
       remainingRounds: this.totalRounds - this.currentRound,
-      printDeficit: Math.max(0, 2 - this.printCount) // Wie viele Prints fehlen noch?
+      printDeficit: Math.max(0, this.targetPrintCount - this.printCount) // Wie viele Prints fehlen noch?
     };
   }
 
@@ -200,7 +208,7 @@ class StrategicWheelController {
     this.totalRounds = newTotalRounds;
     this.currentRound = 0;
     this.printCount = 0;
-    this.targetPrintCount = Math.max(2, Math.floor(newTotalRounds / 5)); // ~1 Print pro 5 Runden
+    this.targetPrintCount = Math.min(3, Math.max(2, Math.floor(newTotalRounds / 6))); // 2-3 Print events based on round count
     this.spinsHistory = [];
   }
 
@@ -214,9 +222,10 @@ class StrategicWheelController {
       ...stats,
       nextProbabilities: nextProbs,
       strategicState: {
-        needsMorePrint: this.printCount < 2,
-        isLastRound: this.currentRound === this.totalRounds - 1,
-        recentColors: this.spinsHistory.slice(-3)
+        needsMorePrint: this.printCount < this.targetPrintCount,
+        isLastRound: this.currentRound === this.totalRounds,
+        recentColors: this.spinsHistory.slice(-3),
+        yellowDeficit: Math.max(0, this.targetPrintCount - this.printCount)
       }
     };
   }
