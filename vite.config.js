@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/analog-programming-game/', // GitHub Pages repository name
+  base: '/analog-programming/', // GitHub Pages repository name
   build: {
     outDir: 'docs',
     assetsDir: 'assets',
