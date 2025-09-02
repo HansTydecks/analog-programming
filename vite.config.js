@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   base: '/analog-programming-game/', // GitHub Pages repository name
   build: {
-    outDir: 'dist',
+    outDir: 'docs',
     assetsDir: 'assets',
     sourcemap: false,
     rollupOptions: {
