@@ -620,48 +620,6 @@ const QuizmasterInterface = ({ gameConfig, onExit, onShowRules }) => {
           </div>
         </div>
 
-        {/* Strategic Wheel Statistics */}
-        <div className="card mb-6">
-          <h3 className="text-xl font-bold mb-4 text-center">🎯 Strategische Rad-Statistiken</h3>
-          {(() => {
-            const stats = strategicWheel.getGameStats();
-            return (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
-                <div className="bg-yellow-50 p-3 rounded">
-                  <div className="text-2xl font-bold text-yellow-600">{stats.printCount}/3</div>
-                  <div className="text-xs text-yellow-700">Print-Ereignisse</div>
-                </div>
-                <div className="bg-green-50 p-3 rounded">
-                  <div className="text-2xl font-bold text-green-600">{stats.colorCounts.green}</div>
-                  <div className="text-xs text-green-700">Grüne Karten</div>
-                </div>
-                <div className="bg-red-50 p-3 rounded">
-                  <div className="text-2xl font-bold text-red-600">{stats.colorCounts.red}</div>
-                  <div className="text-xs text-red-700">Rote Karten</div>
-                </div>
-                <div className="bg-blue-50 p-3 rounded">
-                  <div className="text-2xl font-bold text-blue-600">{stats.colorCounts.blue}</div>
-                  <div className="text-xs text-blue-700">Blaue Karten</div>
-                </div>
-              </div>
-            );
-          })()}
-          
-          {lastWheelResult && lastWheelResult.reason && (
-            <div className="mt-4 p-3 bg-gray-50 rounded text-center">
-              <div className="text-sm text-gray-600">Letzter Spin-Grund:</div>
-              <div className="text-sm font-medium text-gray-800">{lastWheelResult.reason}</div>
-            </div>
-          )}
-          
-          <div className="mt-4 text-center">
-            <div className="text-xs text-gray-500">
-              💡 Das Rad ist strategisch manipuliert für optimales Lernerlebnis:<br/>
-              Mehr Grün (Zahlen), weniger Blau (seltene Karten), garantiertes Print am Ende
-            </div>
-          </div>
-        </div>
-
         {/* Collapsible Log Panel */}
         {showLog && (
           <div className="card">

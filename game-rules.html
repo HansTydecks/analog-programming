@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizmaster Level 1 - Spielregeln</title>
+    <style>
+        @page { margin: 1cm; size: A4; }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            font-size: 13px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .section {
+            margin-bottom: 1rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border-left: 4px solid;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .section.green { border-left-color: #10b981; background: #f0fdf4; }
+        .section.red { border-left-color: #ef4444; background: #fef2f2; }
+        .section.blue { border-left-color: #3b82f6; background: #eff6ff; }
+        .section.yellow { border-left-color: #f59e0b; background: #fffbeb; }
+        
+        .section h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            margin: 0.5rem 0;
+        }
+        
+        .card {
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .card.green { background: #10b981; }
+        .card.red { background: #ef4444; }
+        .card.blue { background: #3b82f6; }
+        .card.yellow { background: #f59e0b; }
+        
+        ul {
+            margin: 0.5rem 0 0 0;
+            padding-left: 1rem;
+        }
+        
+        li {
+            margin-bottom: 0.2rem;
+            font-size: 0.9rem;
+        }
+        
+        .compact {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        @media print {
+            body { font-size: 11px; }
+            .section { margin-bottom: 0.8rem; padding: 0.6rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎮 Quizmaster Level 1 - Spielregeln</h1>
+    </div>
+
+    <div class="compact">
+        <!-- Green Cards -->
+        <div class="section green">
+            <h2>🟢 Grüne Karten - Zahlen</h2>
+            <div class="cards">
+                <div class="card green">0</div>
+                <div class="card green">1</div>
+                <div class="card green">2</div>
+                <div class="card green">3</div>
+                <div class="card green">4</div>
+                <div class="card green">5</div>
+                <div class="card green">6</div>
+                <div class="card green">7</div>
+                <div class="card green">8</div>
+                <div class="card green">9</div>
+            </div>
+            <ul>
+                <li>Grundlage für alle Berechnungen</li>
+                <li>Werden in Zuweisungen verwendet</li>
+            </ul>
+        </div>
+
+        <!-- Red Cards -->
+        <div class="section red">
+            <h2>🔴 Rote Karten - Variablen</h2>
+            <div class="cards">
+                <div class="card red">global_1 =</div>
+                <div class="card red">global_1</div>
+            </div>
+            <ul>
+                <li>global_1 = als neue Zeile unter score =</li>
+                <li>Beim Ausführen müssen Zeilen gefüllt werden</li>
+                <li>Variablen wie beim Programmieren behandeln</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="compact">
+        <!-- Blue Cards -->
+        <div class="section blue">
+            <h2>🔵 Blaue Karten - Operatoren</h2>
+            <div class="cards">
+                <div class="card blue">+</div>
+                <div class="card blue">-</div>
+                <div class="card blue">*</div>
+                <div class="card blue">/</div>
+            </div>
+            <ul>
+                <li>Ersetzen beliebiges + oder -</li>
+                <li>An = anfügen wenn kein +/- ersetzbar</li>
+                <li>Nach blauer Karte: Programm ausführen (außer bei = anfügen)</li>
+            </ul>
+        </div>
+
+        <!-- Yellow Cards -->
+        <div class="section yellow">
+            <h2>🟡 Gelbe Karten - Print</h2>
+            <div class="cards">
+                <div class="card yellow">print(score)</div>
+            </div>
+            <ul>
+                <li>Aktueller score-Wert wird auf Bildschirm übertragen</li>
+                <li>Zeigt Punktestand an</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
